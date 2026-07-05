@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Agro</string>
+    <string name="welcome_msg">Welcome to Agro!</string>
+    <string name="select_language">Select Language</string>
+    <string name="continue_btn">Continue</string>
+
+    <string name="login_title">Login</string>
+    <string name="register_title">Register</string>
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="confirm_password_label">Confirm Password</string>
+    <string name="name_label">Full Name</string>
+    <string name="phone_label">Phone Number</string>
+    <string name="role_label">Select Role</string>
+    <string name="login_btn">Login</string>
+    <string name="register_btn">Register</string>
+    <string name="send_btn">Send Reset Link</string>
+    <string name="no_account">Don\'t have an account? Register</string>
+    <string name="already_account">Already have an account? Login</string>
+    <string name="forgot_password_link">Forgot Password?</string>
+
+    <string name="role_farmer">Farmer</string>
+    <string name="role_machine_owner">Machine Owner</string>
+    <string name="role_shopkeeper">Shopkeeper</string>
+    <string name="role_admin">Admin</string>
+
+    <string name="baking_title">Baking with Gemini</string>
+    <string name="prompt_placeholder">Enter a prompt</string>
+    <string name="results_placeholder">Results will appear here</string>
+    <string name="label_prompt">Prompt</string>
+    <string name="action_go">Go</string>
+    <string name="image1_description">Cupcake</string>
+    <string name="image2_description">Cookies</string>
+    <string name="image3_description">Cake</string>
+</resources>

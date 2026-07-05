@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">एग्रो</string>
+    <string name="welcome_msg">एग्रो में आपका स्वागत है!</string>
+    <string name="select_language">भाषा चुनें</string>
+    <string name="continue_btn">जारी रखें</string>
+
+    <string name="login_title">लॉगिन</string>
+    <string name="register_title">पंजीकरण</string>
+    <string name="forgot_password_title">पासवर्ड भूल गए</string>
+    <string name="email_label">ईमेल</string>
+    <string name="password_label">पासवर्ड</string>
+    <string name="confirm_password_label">पासवर्ड की पुष्टि करें</string>
+    <string name="name_label">पूरा नाम</string>
+    <string name="phone_label">फ़ोन नंबर</string>
+    <string name="role_label">भूमिका चुनें</string>
+    <string name="login_btn">लॉगिन</string>
+    <string name="register_btn">रजिस्टर करें</string>
+    <string name="send_btn">रीसेट लिंक भेजें</string>
+    <string name="no_account">खाता नहीं है? रजिस्टर करें</string>
+    <string name="already_account">पहले से ही खाता है? लॉगिन करें</string>
+    <string name="forgot_password_link">पासवर्ड भूल गए?</string>
+
+    <string name="role_farmer">किसान</string>
+    <string name="role_machine_owner">मशीन मालिक</string>
+    <string name="role_shopkeeper">दुकानदार</string>
+    <string name="role_admin">एडमिन</string>
+</resources>

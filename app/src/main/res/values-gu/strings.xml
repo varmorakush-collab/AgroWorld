@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">એગ્રો</string>
+    <string name="welcome_msg">એગ્રોમાં તમારું સ્વાગત છે!</string>
+    <string name="select_language">ભાષા પસંદ કરો</string>
+    <string name="continue_btn">આગળ વધો</string>
+
+    <string name="login_title">લોગિન</string>
+    <string name="register_title">રજીસ્ટ્રેશન</string>
+    <string name="forgot_password_title">પાસવર્ડ ભૂલી ગયા છો</string>
+    <string name="email_label">ઈમેઈલ</string>
+    <string name="password_label">પાસવર્ડ</string>
+    <string name="confirm_password_label">પાસવર્ડની પુષ્ટિ કરો</string>
+    <string name="name_label">આખું નામ</string>
+    <string name="phone_label">ફોન નંબર</string>
+    <string name="role_label">ભૂમિકા પસંદ કરો</string>
+    <string name="login_btn">લોગિન</string>
+    <string name="register_btn">રજીસ્ટર કરો</string>
+    <string name="send_btn">રીસેટ લિંક મોકલો</string>
+    <string name="no_account">ખાતું નથી? રજીસ્ટર કરો</string>
+    <string name="already_account">પહેલેથી જ ખાતું છે? લોગિન કરો</string>
+    <string name="forgot_password_link">પાસવર્ડ ભૂલી ગયા છો?</string>
+
+    <string name="role_farmer">ખેડૂત</string>
+    <string name="role_machine_owner">મશીન માલિક</string>
+    <string name="role_shopkeeper">દુકાનદાર</string>
+    <string name="role_admin">એડમિન</string>
+</resources>
