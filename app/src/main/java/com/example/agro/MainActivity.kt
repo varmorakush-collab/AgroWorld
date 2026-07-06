@@ -210,7 +210,18 @@ fun AppNavigation(languageManager: LanguageManager, savedLanguage: String?) {
             val id = backStackEntry.arguments?.getString("id") ?: ""
             MachineDetailScreen(
                 machineId = id,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onRentClick = { machineId -> navController.navigate("rent_machine/$machineId") }
+            )
+        }
+        composable("rent_machine/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            RentMachineFormScreen(
+                machineId = id,
+                onBack = { navController.popBackStack() },
+                onSuccess = { 
+                    navController.popBackStack("home/Farmer", inclusive = false)
+                }
             )
         }
         composable("product_detail/{id}") { backStackEntry ->
