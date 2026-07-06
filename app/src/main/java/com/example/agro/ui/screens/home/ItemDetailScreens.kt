@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -28,19 +29,23 @@ import com.example.agro.viewmodel.CartItem
 import com.example.agro.viewmodel.CartViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MachineDetailScreen(
     machineId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onRentClick: (String) -> Unit
 ) {
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     var machineData by remember { mutableStateOf<Map<String, Any>?>(null) }
     var ownerData by remember { mutableStateOf<Map<String, Any>?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var showRentDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     LaunchedEffect(machineId) {
@@ -58,19 +63,21 @@ fun MachineDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Machine Details") }, navigationIcon = {
+            TopAppBar(title = { Text("Machine Details", fontWeight = FontWeight.Bold) }, navigationIcon = {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
             })
         },
         bottomBar = {
             if (machineData != null) {
-                Surface(tonalElevation = 8.dp) {
+                Surface(tonalElevation = 8.dp, shadowElevation = 12.dp) {
                     Button(
-                        onClick = { showRentDialog = true },
+                        onClick = { onRentClick(machineId) },
                         modifier = Modifier.padding(16.dp).fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Rent Now", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Icon(Icons.Default.Agriculture, null)
+                        Spacer(Modifier.width(12.dp))
+                        Text("Rent This Machine", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     }
                 }
             }
@@ -79,78 +86,270 @@ fun MachineDetailScreen(
         if (isLoading) Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
         else if (machineData != null) {
             Column(modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
-                AsyncImage(model = machineData!!["image"], contentDescription = null, modifier = Modifier.fillMaxWidth().height(300.dp), contentScale = ContentScale.Crop)
+                AsyncImage(model = machineData!!["image"], contentDescription = null, modifier = Modifier.fillMaxWidth().height(320.dp), contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text(text = machineData!!["name"].toString(), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                    Text(text = "Category: ${machineData!!["type"]}", fontSize = 18.sp, color = MaterialTheme.colorScheme.secondary)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = "₹${machineData!!["price"]}/hour", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text("Description", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text(text = machineData!!["description"].toString(), fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = machineData!!["name"].toString(), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                            Text(text = machineData!!["type"].toString(), fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Medium)
+                        }
+                        Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(12.dp)) {
+                            Text(text = "₹${machineData!!["price"]}/hr", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
+                        }
+                    }
                     
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("Owner Information", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Card(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
+                    Text("About Machine", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(text = machineData!!["description"].toString(), fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp), lineHeight = 24.sp)
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Text("Machine Provider", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Card(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
                         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            AsyncImage(model = ownerData?.get("profileImage"), contentDescription = null, modifier = Modifier.size(60.dp).clip(CircleShape), contentScale = ContentScale.Crop)
+                            Surface(modifier = Modifier.size(60.dp), shape = CircleShape, color = Color.White) {
+                                AsyncImage(model = ownerData?.get("profileImage"), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
-                                Text(text = ownerData?.get("name")?.toString() ?: "Unknown", fontWeight = FontWeight.Bold)
-                                Text(text = "Contact: ${machineData!!["contact"]}", fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+                                Text(text = ownerData?.get("name")?.toString() ?: "Agro Partner", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Verified, null, tint = Color(0xFF2196F3), modifier = Modifier.size(14.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(text = "Verified Provider", fontSize = 12.sp, color = MaterialTheme.colorScheme.secondary)
+                                }
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
     }
+}
 
-    if (showRentDialog && machineData != null) {
-        RentMachineDialog(
-            machineName = machineData!!["name"].toString(),
-            pricePerHour = machineData!!["price"].toString(),
-            onDismiss = { showRentDialog = false },
-            onConfirm = { hours, date ->
-                val total = (hours.toDoubleOrNull() ?: 0.0) * (machineData!!["price"].toString().toDoubleOrNull() ?: 0.0)
-                val orderData = mapOf(
-                    "customerId" to auth.currentUser?.uid,
-                    "sellerId" to machineData!!["ownerId"],
-                    "items" to listOf(mapOf("name" to machineData!!["name"], "image" to machineData!!["image"], "quantity" to 1, "type" to "Machine", "duration" to "$hours Hours", "date" to date)),
-                    "totalAmount" to total,
-                    "status" to "Pending",
-                    "timestamp" to System.currentTimeMillis()
-                )
-                db.collection("orders").add(orderData).addOnSuccessListener {
-                    showRentDialog = false
-                    Toast.makeText(context, "Rent request sent successfully!", Toast.LENGTH_LONG).show()
-                    onBack()
-                }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RentMachineFormScreen(
+    machineId: String,
+    onBack: () -> Unit,
+    onSuccess: () -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val context = LocalContext.current
+    
+    var machineData by remember { mutableStateOf<Map<String, Any>?>(null) }
+    var selectedHours by remember { mutableFloatStateOf(4f) }
+    var deliveryAddress by remember { mutableStateOf("") }
+    var isSubmitting by remember { mutableStateOf(false) }
+    
+    val datePickerState = rememberDatePickerState()
+    var showDatePicker by remember { mutableStateOf(false) }
+    var selectedDateText by remember { mutableStateOf("") }
+
+    LaunchedEffect(machineId) {
+        db.collection("machines").document(machineId).get().addOnSuccessListener { doc ->
+            machineData = doc.data
+        }
+        
+        // Pre-fill user address if available
+        auth.currentUser?.uid?.let { uid ->
+            db.collection("users").document(uid).get().addOnSuccessListener { doc ->
+                deliveryAddress = doc.getString("address") ?: ""
             }
-        )
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Rent Machine", fontWeight = FontWeight.Bold) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } }
+            )
+        }
+    ) { padding ->
+        if (machineData == null) {
+            Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Machine Summary Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                ) {
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        AsyncImage(model = machineData!!["image"], contentDescription = null, modifier = Modifier.size(80.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text(machineData!!["name"].toString(), fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                            Text("Rate: ₹${machineData!!["price"]}/hour", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // 1. Hours Selection with Slider
+                Text("How many hours do you need it?", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                    Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "${selectedHours.toInt()} Hours", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                        Slider(
+                            value = selectedHours,
+                            onValueChange = { selectedHours = it },
+                            valueRange = 1f..48f,
+                            steps = 47,
+                            colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
+                        )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("1 hr", fontSize = 12.sp)
+                            Text("48 hrs", fontSize = 12.sp)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // 2. Date Selection
+                Text("Select Delivery Date", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = selectedDateText,
+                    onValueChange = {},
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Choose Date") },
+                    readOnly = true,
+                    shape = RoundedCornerShape(16.dp),
+                    trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.CalendarMonth, null) } },
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // 3. Address Input
+                Text("Delivery Address", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = deliveryAddress,
+                    onValueChange = { deliveryAddress = it },
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    placeholder = { Text("Enter full address where machine is needed") },
+                    shape = RoundedCornerShape(16.dp),
+                    maxLines = 4
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Price Summary
+                val hourlyRate = machineData!!["price"].toString().toDoubleOrNull() ?: 0.0
+                val totalAmount = hourlyRate * selectedHours.toInt()
+                
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                            Text("Hourly Rate")
+                            Text("₹$hourlyRate")
+                        }
+                        Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                            Text("Total Duration")
+                            Text("${selectedHours.toInt()} Hours")
+                        }
+                        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                        Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                            Text("Total Payable", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text("₹$totalAmount", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        if (selectedDateText.isEmpty()) {
+                            Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        if (deliveryAddress.isBlank()) {
+                            Toast.makeText(context, "Please provide an address", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        
+                        isSubmitting = true
+                        val orderData = mapOf(
+                            "customerId" to auth.currentUser?.uid,
+                            "sellerId" to machineData!!["ownerId"],
+                            "items" to listOf(mapOf(
+                                "name" to machineData!!["name"],
+                                "image" to machineData!!["image"],
+                                "price" to machineData!!["price"],
+                                "quantity" to 1,
+                                "type" to "Machine",
+                                "duration" to "${selectedHours.toInt()} Hours",
+                                "date" to selectedDateText,
+                                "address" to deliveryAddress
+                            )),
+                            "totalAmount" to totalAmount,
+                            "status" to "Pending",
+                            "timestamp" to System.currentTimeMillis()
+                        )
+                        
+                        db.collection("orders").add(orderData).addOnSuccessListener {
+                            isSubmitting = false
+                            Toast.makeText(context, "Booking Request Sent Successfully!", Toast.LENGTH_LONG).show()
+                            onSuccess()
+                        }.addOnFailureListener {
+                            isSubmitting = false
+                            Toast.makeText(context, "Booking Failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = !isSubmitting
+                ) {
+                    if (isSubmitting) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    else Text("Confirm Booking", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
+                
+                Spacer(modifier = Modifier.height(40.dp))
+            }
+        }
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        selectedDateText = sdf.format(Date(it))
+                    }
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } }
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
 }
 
-@Composable
-fun RentMachineDialog(machineName: String, pricePerHour: String, onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
-    var hours by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Rent $machineName", fontWeight = FontWeight.Bold) },
-        text = {
-            Column {
-                Text("Price: ₹$pricePerHour / hour", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(value = hours, onValueChange = { if (it.all { c -> c.isDigit() }) hours = it }, label = { Text("How many hours?") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(value = date, onValueChange = { date = it }, label = { Text("Start Date (DD/MM/YYYY)") }, modifier = Modifier.fillMaxWidth())
-            }
-        },
-        confirmButton = { Button(onClick = { if (hours.isNotEmpty() && date.isNotEmpty()) onConfirm(hours, date) }) { Text("Send Request") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
